@@ -47,8 +47,8 @@ function ProductCard(props) {
                     <>
                         <Card.Title>{product.name}</Card.Title>
                         <Card.Text>{product.description}</Card.Text>
-                        <Button variant="danger" onClick={() => deleteProduct()}>Delete Product</Button>
-                        <Button variant="secondary" onClick={() => setEditing(true)}>Edit Product</Button>
+                        <Button variant="danger" onClick={() => deleteProduct()}>Delete ToDo</Button>
+                        <Button variant="secondary" onClick={() => setEditing(true)}>Edit ToDo</Button>
                     </>
                 :
                     <>
