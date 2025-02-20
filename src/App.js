@@ -1,26 +1,18 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { Navbar, Container, Nav, Form, Row, Col, Button } from 'react-bootstrap';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar, Container, Nav, Form, Row, Col, Button } from 'react-bootstrap';
-import { useState, useEffect } from 'react';
+import './custom.css';
 import ProductCard from './productCard';
 import { supabase } from './supabaseClient';
-
-// IEVMMvL3YM3zbOu4
-
-// Create the user interface (Navbar, Form to create products, product card)
-// Setup supabase, create a table for our products
-// Implement the CRUD logic for the products
-
-//Stlouis314623!
+import Countdown from './Countdown';
+import About from './About';  // Import the About component
 
 function App() {
-  const [ name, setName ] = useState("");
-  const [ description, setDescription ] = useState("");
-  const [ products, setProducts] = useState([]);
-
-  console.log(name);
-  console.log(description);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     getProducts();
@@ -34,7 +26,7 @@ function App() {
         .limit(10)
       if (error) throw error;
       if (data != null) {
-        setProducts(data); // [product1,product2,product3]
+        setProducts(data);
       }
     } catch (error) {
       alert(error.message);
@@ -47,10 +39,11 @@ function App() {
         .from("products")
         .insert({
           name: name,
-          description: description
+          description: description,
+          completed: false
         })
         .single()
-        
+
       if (error) throw error;
       window.location.reload();
     } catch (error) {
@@ -58,49 +51,123 @@ function App() {
     }
   }
 
-  console.log(products);
+  async function toggleComplete(productId, completed) {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .update({ completed: !completed })
+        .eq('id', productId)
+
+      if (error) throw error;
+      setProducts(products.map(product => product.id === productId ? { ...product, completed: !completed } : product));
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+  async function deleteProduct(productId) {
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq('id', productId)
+
+      if (error) throw error;
+      setProducts(products.filter(product => product.id !== productId));
+    } catch (error) {
+      alert(error.message);
+    }
+  }
 
   return (
-    <>
-      <Navbar>
+    <Router>
+      <Navbar bg="dark" variant="dark" className="custom-navbar"> {/* Apply custom-navbar class */}
         <Container>
-          <Navbar.Brand>Cruise Countdown</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">Cruise Countdown</Navbar.Brand>
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/">Home</Nav.Link>
+            <Nav.Link as={Link} to="/about">About</Nav.Link>
+          </Nav>
           <Nav>
             <Nav.Item>Created by Sean Hoene</Nav.Item>
           </Nav>
         </Container>
       </Navbar>
-      <Container>
-        <Row>
-          <Col xs={12} md={8}>
-            <h3>Cruise To Dos</h3>
-            <Form.Label>Cruise Item</Form.Label>
-            <Form.Control
-              type="text"
-              id="name"
-              onChange={(e) => setName(e.target.value)}
-            />
-            <Form.Label>Item Description</Form.Label>
-            <Form.Control
-              type="text"
-              id="description"
-              onChange={(e) => setDescription(e.target.value)}
-            />  
-            <br></br>
-            <Button onClick={() => createProduct()}>Create New To Do</Button>
-          </Col>
-        </Row>
-        <hr></hr>
-        <h3>Current To Dos</h3>
-        <Row xs={1} lg={3} className="g-4">
-          {products.map((product) => (
-            <Col>
-              <ProductCard product={product} /> {/* product={product} */}
-            </Col>
-          ))}
-        </Row>
+      <Container className="custom-bg">
+        <Routes>
+          <Route path="/" element={
+            <>
+              <div className="container">
+                <Countdown />
+                <img
+                  src="https://media1.tenor.com/m/86pyxiOlUgYAAAAC/dance-happy.gif"
+                  alt="Dancing GIF"
+                  className="custom-image"
+                />
+                <h1 className="center-header">🚢 Welcome to the Cruise Countdown! 🚢</h1>
+                <hr></hr>
+                <h1>
+                  🎉 The Countdown is On! March 7th is the departure date for our cruise!
+                  🛳️
+                </h1>
+                <p>
+                  Welcome Tyler and Tara! We're so excited for the cruise—only a little
+                  while longer until the adventure begins!
+                </p>
+                <p>Don't forget to pack your sunscreen and sense of adventure! 🌞</p>
+                <p>
+                  🧳 And don’t forget to plan your wardrobe—think tropical vibes, comfy
+                  shoes, and cruise-worthy outfits!
+                </p>
+                
+              </div>
+              <Row>
+                <Col xs={12} md={8}>
+                  <h3 className="center-header">Cruise To Dos</h3>
+                  <Form.Label className="custom-font-todo">Cruise Item</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="name"
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <Form.Label className="custom-font-description">Item Description</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="description"
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                  <br></br>
+                  <Button onClick={() => createProduct()}>Create New To Do</Button>
+                </Col>
+              </Row>
+              <hr></hr>
+              <h3 className="center-header">Current To Dos</h3>
+              <Row xs={1} lg={3} className="g-4">
+                {products.map((product) => (
+                  <Col key={product.id}>
+                    <ProductCard 
+                      product={product} 
+                      customClass="custom-font-description" 
+                      onComplete={() => toggleComplete(product.id, product.completed)} 
+                      onDelete={() => deleteProduct(product.id)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </>
+          } />
+          <Route path="/about" element={<About />} />
+        </Routes>
+        <div className="survey">
+                  <p>Before you go, please complete this required survey:</p>
+                  <a
+                    href="https://blog.cruises.com/quiz/what-type-of-cruiser-are-you/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >Take the "What Type of Cruiser Are You?" Quiz</a>
+                </div>
       </Container>
-    </>
+    </Router>
   );
 }
 
