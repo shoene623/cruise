@@ -8,6 +8,7 @@ const ProductCard = ({ product, customClass, onComplete, onDelete, onPhotoUpload
 
   const capturePhoto = () => {
     const imageSrc = webcamRef.current.getScreenshot();
+    console.log('Captured photo for product:', product.id);
     onPhotoUpload(product.id, imageSrc);
     setIsWebcamOpen(false);
   };

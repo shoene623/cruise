@@ -98,17 +98,19 @@ function App() {
       const fileName = `${productId}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { data, error } = await supabase.storage
+      console.log('Uploading file:', fileName);
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('photos')
         .upload(filePath, blob);
 
-      if (error) {
-        console.error('Error uploading photo:', error.message);
-        alert(error.message);
+      if (uploadError) {
+        console.error('Error uploading photo:', uploadError.message);
+        alert(uploadError.message);
         return;
       }
 
-      const { publicURL, error: publicUrlError } = supabase.storage
+      const { data: publicUrlData, error: publicUrlError } = supabase.storage
         .from('photos')
         .getPublicUrl(filePath);
       
@@ -118,12 +120,14 @@ function App() {
         return;
       }
 
+      const publicURL = publicUrlData.publicUrl;
       console.log('Public URL:', publicURL);
 
       const { data: updatedProduct, error: updateError } = await supabase
         .from('products')
         .update({ photo_url: publicURL, completed: true })
-        .eq('id', productId);
+        .eq('id', productId)
+        .select();
 
       if (updateError) {
         console.error('Error updating product:', updateError.message);
