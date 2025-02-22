@@ -7,7 +7,8 @@ import './custom.css';
 import ProductCard from './productCard';
 import { supabase } from './supabaseClient';
 import Countdown from './Countdown';
-import About from './About';  // Import the About component
+import About from './About';
+import WeatherDashboard from './WeatherDashboard';
 
 function App() {
   const [name, setName] = useState("");
@@ -16,19 +17,18 @@ function App() {
 
   useEffect(() => {
     getProducts();
-  }, [])
+  }, []);
 
   async function getProducts() {
     try {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .limit(10)
+        .order('id', { ascending: false });
       if (error) throw error;
-      if (data != null) {
-        setProducts(data);
-      }
+      setProducts(data);
     } catch (error) {
+      console.error('Error fetching products:', error.message);
       alert(error.message);
     }
   }
@@ -40,13 +40,15 @@ function App() {
         .insert({
           name: name,
           description: description,
-          completed: false
+          completed: false,
+          photo_url: null
         })
-        .single()
+        .single();
 
       if (error) throw error;
       window.location.reload();
     } catch (error) {
+      console.error('Error creating product:', error.message);
       alert(error.message);
     }
   }
@@ -56,11 +58,12 @@ function App() {
       const { data, error } = await supabase
         .from("products")
         .update({ completed: !completed })
-        .eq('id', productId)
+        .eq('id', productId);
 
       if (error) throw error;
       setProducts(products.map(product => product.id === productId ? { ...product, completed: !completed } : product));
     } catch (error) {
+      console.error('Error toggling complete:', error.message);
       alert(error.message);
     }
   }
@@ -70,23 +73,82 @@ function App() {
       const { error } = await supabase
         .from("products")
         .delete()
-        .eq('id', productId)
+        .eq('id', productId);
 
       if (error) throw error;
       setProducts(products.filter(product => product.id !== productId));
     } catch (error) {
+      console.error('Error deleting product:', error.message);
+      alert(error.message);
+    }
+  }
+
+  async function handlePhotoUpload(productId, imageSrc) {
+    try {
+      const byteString = atob(imageSrc.split(',')[1]);
+      const mimeString = imageSrc.split(',')[0].split(':')[1].split(';')[0];
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const uint8Array = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([arrayBuffer], { type: mimeString });
+
+      const fileExt = mimeString.split('/')[1];
+      const fileName = `${productId}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('photos')
+        .upload(filePath, blob);
+
+      if (error) {
+        console.error('Error uploading photo:', error.message);
+        alert(error.message);
+        return;
+      }
+
+      const { publicURL, error: publicUrlError } = supabase.storage
+        .from('photos')
+        .getPublicUrl(filePath);
+      
+      if (publicUrlError) {
+        console.error('Error getting public URL:', publicUrlError.message);
+        alert(publicUrlError.message);
+        return;
+      }
+
+      console.log('Public URL:', publicURL);
+
+      const { data: updatedProduct, error: updateError } = await supabase
+        .from('products')
+        .update({ photo_url: publicURL, completed: true })
+        .eq('id', productId);
+
+      if (updateError) {
+        console.error('Error updating product:', updateError.message);
+        alert(updateError.message);
+        return;
+      }
+
+      console.log('Updated product:', updatedProduct);
+
+      setProducts(products.map(product => product.id === productId ? { ...product, photo_url: publicURL, completed: true } : product));
+    } catch (error) {
+      console.error('Error handling photo upload:', error.message);
       alert(error.message);
     }
   }
 
   return (
     <Router>
-      <Navbar bg="dark" variant="dark" className="custom-navbar"> {/* Apply custom-navbar class */}
+      <Navbar bg="dark" variant="dark" className="custom-navbar">
         <Container>
           <Navbar.Brand as={Link} to="/">Cruise Countdown</Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/about">About</Nav.Link>
+            <Nav.Link as={Link} to="/weather">Weather</Nav.Link>
           </Nav>
           <Nav>
             <Nav.Item>Created by Sean Hoene</Nav.Item>
@@ -119,7 +181,14 @@ function App() {
                   🧳 And don’t forget to plan your wardrobe—think tropical vibes, comfy
                   shoes, and cruise-worthy outfits!
                 </p>
-                
+                <div className="survey">
+                  <p>Before you go, please complete this required survey:</p>
+                  <a
+                    href="https://blog.cruises.com/quiz/what-type-of-cruiser-are-you/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >Take the "What Type of Cruiser Are You?" Quiz</a>
+                </div>
               </div>
               <Row>
                 <Col xs={12} md={8}>
@@ -150,6 +219,7 @@ function App() {
                       customClass="custom-font-description" 
                       onComplete={() => toggleComplete(product.id, product.completed)} 
                       onDelete={() => deleteProduct(product.id)}
+                      onPhotoUpload={handlePhotoUpload}
                     />
                   </Col>
                 ))}
@@ -157,15 +227,8 @@ function App() {
             </>
           } />
           <Route path="/about" element={<About />} />
+          <Route path="/weather" element={<WeatherDashboard />} />
         </Routes>
-        <div className="survey">
-                  <p>Before you go, please complete this required survey:</p>
-                  <a
-                    href="https://blog.cruises.com/quiz/what-type-of-cruiser-are-you/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >Take the "What Type of Cruiser Are You?" Quiz</a>
-                </div>
       </Container>
     </Router>
   );

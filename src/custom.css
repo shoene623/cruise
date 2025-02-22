@@ -1,61 +1,86 @@
 /* Custom background style */
 body {
-    margin: 0;
-    padding: 20px; /* Add padding to the body */
-    font-family: Arial, sans-serif;
-    background: url('https://img.freepik.com/premium-photo/scenic-aerial-perspective-beautiful-large-cruise-ship-sailing-open-sea_956920-44919.jpg')
-      no-repeat center center fixed;
-    background-size: cover;
-    color: white;
-    text-shadow: 1px 1px 2px black;
-  }
-  
-  .custom-bg {
-    background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background to make content readable */
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  /* Custom font style for the to-do item */
-  .custom-font-todo {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.2em;
-  }
-  
-  /* Custom font style for the product description */
-  .custom-font-description {
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 1em;
-  }
-  
-  /* Completed style */
-  .completed {
-    text-decoration: line-through;
-    color: gray;
-  }
-  
-  /* Custom styles for the image */
-  .custom-image {
-    width: 150px; /* Change the width as needed */
-    height: auto; /* Maintain aspect ratio */
-    position: relative; /* Adjust positioning */
-    top: 20px; /* Adjust the position from the top */
-    left: 20px; /* Adjust the position from the left */
-  }
-  
-  /* Center header style */
-  .center-header {
-    text-align: center;
-  }
-  
-  /* Custom styles for the navbar */
-  .custom-navbar {
-    background-color: #76bde3 !important; /* Change the background color */
-    color: white !important; /* Change the text color */;
-  }
-  
-  .custom-navbar .navbar-brand,
-  .custom-navbar .nav-link,
-  .custom-navbar .nav-item {
-    color: white !important; /* Ensure navbar text is white */
-  }
+  margin: 0;
+  padding: 20px; /* Add padding to the body */
+  font-family: Arial, sans-serif;
+  background: url('https://img.freepik.com/premium-photo/scenic-aerial-perspective-beautiful-large-cruise-ship-sailing-open-sea_956920-44919.jpg')
+    no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+}
+
+.custom-bg {
+  background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background to make content readable */
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* Custom font style for the to-do item */
+.custom-font-todo {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.2em;
+}
+
+/* Custom font style for the product description */
+.custom-font-description {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1em;
+}
+
+/* Completed style */
+.completed {
+  text-decoration: line-through;
+  color: gray;
+}
+
+/* Custom styles for the image */
+.custom-image {
+  width: 150px; /* Change the width as needed */
+  height: auto; /* Maintain aspect ratio */
+  position: relative; /* Adjust positioning */
+  top: 20px; /* Adjust the position from the top */
+  left: 20px; /* Adjust the position from the left */
+}
+
+/* Center header style */
+.center-header {
+  text-align: center;
+}
+
+/* Custom styles for the navbar */
+.custom-navbar {
+  background-color: #76bde3 !important; /* Change the background color */
+  color: white !important; /* Change the text color */;
+}
+
+.custom-navbar .navbar-brand,
+.custom-navbar .nav-link,
+.custom-navbar .nav-item {
+  color: white !important; /* Ensure navbar text is white */
+}
+
+/* Completed item style */
+.completed-item {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Task photo style */
+.task-photo {
+  width: 100px;
+  height: auto;
+  margin-left: 10px;
+}
+
+.empty-photo-shell {
+  width: 100px;
+  height: 100px;
+  background-color: lightgray;
+  margin-left: 10px;
+}
+
+.task-container {
+  display: flex;
+  align-items: center;
+}
