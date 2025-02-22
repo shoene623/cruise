@@ -46,7 +46,7 @@ const WeatherDashboard = () => {
 
   return (
     <div className="weather-dashboard">
-      <h1>Weather Dashboard</h1>
+      <h1>Weather Dashboard - Shows current weather until 5 days before cruise</h1>
       {error && <p className="error">{error}</p>}
       <div className="weather-info">
         {weatherData.capeCanaveral && (
